@@ -145,16 +145,11 @@ func (c *Client) createPowernapClient() error {
 		return fmt.Errorf("invalid lsp command: %w", err)
 	}
 
-	envs := make([]string, 0, len(c.config.Environment))
-	for k, v := range c.config.Environment {
-		envs = append(envs, k+"="+v)
-	}
-
 	clientConfig := powernap.ClientConfig{
 		Command:     command,
 		Args:        c.config.Args,
 		RootURI:     rootURI,
-		Environment: envs,
+		Environment: c.config.Environment,
 		Settings:    c.config.Settings,
 		InitOptions: c.config.InitOptions,
 		WorkspaceFolders: []protocol.WorkspaceFolder{

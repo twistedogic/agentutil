@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	powernapconfig "github.com/charmbracelet/x/powernap/pkg/config"
 )
 
 // TestVersionedMapBasic tests basic VersionedMap operations.
@@ -184,6 +186,7 @@ func TestManagerStart(t *testing.T) {
 		clients:     NewMap[string, *Client](),
 		unavailable: NewMap[string, time.Time](),
 		now:         time.Now,
+		manager:     powernapconfig.NewManager(),
 	}
 
 	// Should not panic

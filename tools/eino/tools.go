@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/x/powernap/pkg/lsp/protocol"
 	"charm.land/fantasy"
-	"github.com/cloudwego/eino/compose"
+	"github.com/twistedogic/agentutil/lsp"
 )
 
 // DiagnosticsTool wraps LSP diagnostics as an eino Tool.
-func DiagnosticsTool(manager compose.LSPClient[*protocol.WorkspaceEditParams, *protocol.Location]) fantasy.AgentTool {
+func DiagnosticsTool(manager *lsp.Manager) fantasy.AgentTool {
 	return fantasy.NewAgentTool(
 		"diagnostics",
 		"Get LSP diagnostics (errors, warnings) for a file or all open files",
@@ -31,7 +30,7 @@ type diagnosticsParams struct {
 }
 
 // ReferencesTool wraps LSP references as an eino Tool.
-func ReferencesTool(manager compose.LSPClient[*protocol.WorkspaceEditParams, *protocol.Location]) fantasy.AgentTool {
+func ReferencesTool(manager *lsp.Manager) fantasy.AgentTool {
 	return fantasy.NewAgentTool(
 		"lsp_references",
 		"Find all references to a symbol at a given position in a file",
@@ -52,7 +51,7 @@ type referencesParams struct {
 }
 
 // RestartTool wraps LSP server restart as an eino Tool.
-func RestartTool(manager compose.LSPClient[*protocol.WorkspaceEditParams, *protocol.Location]) fantasy.AgentTool {
+func RestartTool(manager *lsp.Manager) fantasy.AgentTool {
 	return fantasy.NewAgentTool(
 		"lsp_restart",
 		"Restart an LSP server by name. If name is empty, restarts all servers.",

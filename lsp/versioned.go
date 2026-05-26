@@ -31,6 +31,11 @@ func (m *VersionedMap[K, V]) Get(key K) (V, bool) {
 	return v, ok
 }
 
+// Del deletes the key.
+func (m *VersionedMap[K, V]) Del(key K) {
+	m.Delete(key)
+}
+
 // Delete deletes the key.
 func (m *VersionedMap[K, V]) Delete(key K) {
 	m.mu.Lock()

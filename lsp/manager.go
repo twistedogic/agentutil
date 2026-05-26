@@ -86,6 +86,7 @@ type ServerConfig struct {
 	InitOptions map[string]any
 	Settings    map[string]any
 	Timeout     int
+	Disabled    bool
 }
 
 // NewManager creates a new LSP manager service from a ConfigStore.

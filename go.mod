@@ -1,4 +1,4 @@
-module github.com/twistedogic/lsplib
+module github.com/twistedogic/agentutil
 
 go 1.24
 

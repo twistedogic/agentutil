@@ -1,4 +1,4 @@
-# lsplib
+# agentutil
 
 A standalone Go library for Language Server Protocol (LSP) integration in AI agents. Extracted from [charmbracelet/crush](https://github.com/charmbracelet/crush).
 
@@ -13,7 +13,7 @@ A standalone Go library for Language Server Protocol (LSP) integration in AI age
 ## Installation
 
 ```bash
-go get github.com/twistedogic/lsplib
+go get github.com/twistedogic/agentutil
 ```
 
 ## Quick Start
@@ -24,7 +24,7 @@ package main
 import (
     "context"
     "log/slog"
-    "github.com/twistedogic/lsplib/lsp"
+    "github.com/twistedogic/agentutil/lsp"
 )
 
 func main() {
@@ -121,7 +121,7 @@ func (e *envResolver) ResolveValue(v string) (string, error) {
 ## Architecture
 
 ```
-lsplib/
+agentutil/
 ├── lsp/
 │   ├── manager.go      # Manager: server detection, lifecycle, callbacks
 │   ├── client.go       # Client: powernap wrapper, diagnostics cache

@@ -16,6 +16,7 @@ func main() {
 
 	root.AddCommand(newLSPCmd())
 	root.AddCommand(newFetchCmd())
+	root.AddCommand(newWikiCmd())
 
 	if err := root.Execute(); err != nil {
 		writeError(err)

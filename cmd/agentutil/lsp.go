@@ -11,7 +11,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/spf13/cobra"
-	"github.com/twistedogic/agentutil/lsp"
+	"github.com/twistedogic/agentutil/tools/lsp"
 )
 
 // rootMarkers are used to detect workspace root.

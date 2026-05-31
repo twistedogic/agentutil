@@ -15,6 +15,7 @@ func main() {
 	}
 
 	root.AddCommand(newLSPCmd())
+	root.AddCommand(newFetchCmd())
 
 	if err := root.Execute(); err != nil {
 		writeError(err)

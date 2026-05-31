@@ -196,7 +196,7 @@ When preparing to refactor:
 
 ### From source
 ```bash
-go install github.com/twistedogic/agentutil/cmd/agentutil@latest
+go install github.com/twistedogic/agentutil@latest
 ```
 
 ### Verify installation

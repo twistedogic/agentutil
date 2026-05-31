@@ -82,7 +82,7 @@ agentutil fetch https://docs.example.com/api-reference
 ## Installation
 
 ```bash
-go install github.com/twistedogic/agentutil/cmd/agentutil@latest
+go install github.com/twistedogic/agentutil@latest
 ```
 
 Verify:

@@ -12,6 +12,14 @@ A standalone Go library for Language Server Protocol (LSP) integration in AI age
 
 ## Installation
 
+**CLI binary:**
+
+```bash
+go install github.com/twistedogic/agentutil@latest
+```
+
+**As a library:**
+
 ```bash
 go get github.com/twistedogic/agentutil
 ```

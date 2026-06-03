@@ -1,14 +1,14 @@
 # agentutil
 
-A standalone Go library for Language Server Protocol (LSP) integration in AI agents. Extracted from [charmbracelet/crush](https://github.com/charmbracelet/crush).
+A CLI toolkit and Go library for AI agent utilities: LSP integration, web fetch, web search, and Wikipedia lookup.
 
 ## Features
 
-- **Auto-detection**: Automatically detects installed LSP servers via `exec.LookPath`
-- **Lazy initialization**: Starts LSP clients only when relevant files are accessed
-- **3 tools**: `lsp_diagnostics`, `lsp_references`, `lsp_restart` — ready for agent integration
-- **Pure stdio transport**: Uses [powernap](https://github.com/charmbracelet/x/tree/main/powernap) for JSON-RPC over stdin/stdout
-- **Standalone**: No external agent framework required — works with any Go codebase
+- **LSP integration**: Auto-detects installed language servers, lazy initialization, diagnostics and references tools
+- **Web fetch**: Fetches URLs and converts HTML to clean markdown with extracted links
+- **Web search**: Searches the web via DuckDuckGo and returns structured results
+- **Wikipedia**: Looks up topics on Wikipedia and returns clean markdown summaries
+- **Fantasy agent tools**: All tools expose a `fantasy.AgentTool` for use with [charm.land/fantasy](https://charm.sh)
 
 ## Installation
 
@@ -24,7 +24,84 @@ go install github.com/twistedogic/agentutil@latest
 go get github.com/twistedogic/agentutil
 ```
 
-## Quick Start
+## CLI Commands
+
+### `fetch`
+
+Fetch a URL and return its content as clean markdown plus extracted links.
+
+```bash
+agentutil fetch <url> [--timeout 30s]
+```
+
+Output:
+```json
+{
+  "content": "# Page Title\n\nBody as markdown...",
+  "links": ["https://example.com/page"]
+}
+```
+
+### `search`
+
+Search the web via DuckDuckGo and return structured results.
+
+```bash
+agentutil search <query> [--max 10] [-n 10] [--timeout 30s]
+```
+
+Output:
+```json
+{
+  "results": [
+    {
+      "position": 1,
+      "title": "The Go Programming Language",
+      "url": "https://go.dev/",
+      "snippet": "Go is an open source programming language..."
+    }
+  ]
+}
+```
+
+> A random 500–2000ms delay is applied before each request to avoid rate limiting.
+
+### `wiki`
+
+Look up a topic on Wikipedia.
+
+```bash
+agentutil wiki <topic>
+```
+
+### `lsp`
+
+LSP integration tools for AI agents.
+
+```bash
+agentutil lsp diagnostics <file>
+agentutil lsp references <symbol> [--path <dir>]
+agentutil lsp restart [--name <server>]
+```
+
+## Architecture
+
+```
+agentutil/
+├── main.go             # CLI root command
+├── fetch.go            # fetch command
+├── search.go           # search command
+├── wiki.go             # wiki command
+├── lsp.go              # lsp command
+├── tools/
+│   ├── fetch/          # HTML fetch + markdown conversion
+│   ├── search/         # DuckDuckGo scraping + result parsing
+│   ├── wiki/           # Wikipedia API client
+│   └── lsp/            # LSP manager, client, handlers
+└── config/             # ServerConfig types
+```
+
+## LSP Quick Start
 
 ```go
 package main
@@ -32,183 +109,42 @@ package main
 import (
     "context"
     "log/slog"
-    "github.com/twistedogic/agentutil/lsp"
+    "github.com/twistedogic/agentutil/tools/lsp"
 )
 
 func main() {
-    // Config store providing LSP server definitions
     store := &myConfigStore{}
-    workDir := "/path/to/project"
+    manager := lsp.NewManager(store, "/path/to/project")
 
-    manager := lsp.NewManager(store, workDir)
-
-    // Set callback to receive client lifecycle events
     manager.SetCallback(func(name string, client *lsp.Client) {
         slog.Info("LSP client event", "name", name, "state", client.GetServerState())
     })
 
     ctx := context.Background()
-
-    // Start LSP for a file — manager auto-detects the right server
     manager.Start(ctx, "/path/to/project/main.go")
 
-    // Access running clients
     for name, client := range manager.Clients().Seq2() {
-        slog.Info("Running LSP", "name", name, "files", client.FileTypes())
         diags := client.GetDiagnostics()
-        for uri, diagList := range diags {
-            slog.Info("Diagnostics", "uri", uri, "count", len(diagList))
-        }
+        slog.Info("Diagnostics", "server", name, "count", len(diags))
     }
 }
 ```
 
-## Configuration
+## Agent Skills
 
-### ConfigStore Interface
+Pre-built skills for use with AI coding assistants (Crush, Claude Code, etc.) are in `skills/`:
 
-Implement `ConfigStore` to provide LSP server definitions:
-
-```go
-type ConfigStore interface {
-    LSP() map[string]ServerConfig  // LSP server configs keyed by name
-    AutoLSP() *bool                 // nil means auto-start enabled
-    Resolver() VariableResolver     // resolves variable references
-}
-
-type VariableResolver interface {
-    ResolveValue(v string) (string, error)
-}
-
-type ServerConfig struct {
-    Command     string
-    Args        []string
-    Environment map[string]string
-    FileTypes   []string
-    RootMarkers []string
-    InitOptions map[string]any
-    Settings    map[string]any
-    Timeout     int
-}
-```
-
-### Example: JSON config store
-
-```go
-type JSONConfigStore struct {
-    servers map[string]lsp.ServerConfig
-    autoLSP bool
-}
-
-func (c *JSONConfigStore) LSP() map[string]lsp.ServerConfig {
-    return c.servers
-}
-
-func (c *JSONConfigStore) AutoLSP() *bool {
-    return &c.autoLSP
-}
-
-func (c *JSONConfigStore) Resolver() lsp.VariableResolver {
-    return &envResolver{}
-}
-
-type envResolver struct{}
-
-func (e *envResolver) ResolveValue(v string) (string, error) {
-    // Expand ${VAR} or $VAR from environment
-    if strings.HasPrefix(v, "${") && strings.HasSuffix(v, "}") {
-        return os.Getenv(v[2:len(v)-1]), nil
-    }
-    if strings.HasPrefix(v, "$") {
-        return os.Getenv(v[1:]), nil
-    }
-    return v, nil
-}
-```
-
-## Architecture
-
-```
-agentutil/
-├── lsp/
-│   ├── manager.go      # Manager: server detection, lifecycle, callbacks
-│   ├── client.go       # Client: powernap wrapper, diagnostics cache
-│   ├── handlers.go     # LSP notification/request handlers
-│   └── versioned.go    # Thread-safe versioned map for diagnostics
-├── config/
-│   ├── config.go       # ServerConfig type definitions
-│   └── types.go        # ResolvedConfig for Goof-based apps
-└── tools/
-    └── eino/            # (planned) eino adapter for tool integration
-```
-
-### Manager
-
-- Loads default LSP servers from powernap's registry
-- Merges user-configured servers
-- Starts servers lazily when files are accessed
-- Tracks unavailable servers with retry backoff
-- Skips generic commands (node, python, etc.) unless user-configured
-
-### Client
-
-- Wraps powernap JSON-RPC client (stdio transport)
-- Caches diagnostics in a VersionedMap (lock-free reads)
-- Supports file open/close/change notifications
-- Implements graceful restart
-
-### Handlers
-
-- `workspace/applyEdit` — placeholder for code edit application
-- `workspace/configuration` — returns empty config (handled by client)
-- `client/registerCapability` — tracks file watcher registrations
-- `window/showMessage` — logs server messages
-- `textDocument/publishDiagnostics` — updates diagnostic cache
-
-## Integration with Agent Frameworks
-
-### Fantasy (Charm)
-
-Crush uses [charm.land/fantasy](https://charm.sh) for tool registration. The LSP tools are defined in `internal/agent/tools/`:
-
-- `diagnostics.go` — `lsp_diagnostics` tool
-- `references.go` — `lsp_references` tool  
-- `lsp_restart.go` — `lsp_restart` tool
-
-### eino (CloudWeGo)
-
-Integration via `tools/eino/` package (planned):
-
-```go
-// Planned API
-manager := lsp.NewManager(store, workDir)
-tools := eino.NewLSPRegistry(manager)
-
-agent, _ := adk.NewChatModelAgent(ctx, &adk.ChatModelAgentConfig{
-    Model: chatModel,
-    ToolsConfig: tools,
-})
-```
-
-## Key Design Decisions
-
-1. **Standalone**: No agent framework coupling — works with fantasy, eino, or custom agents
-2. **Powernap**: JSON-RPC over stdio — same transport as crush, no custom protocol
-3. **ConfigStore interface**: Decouples configuration from LSP logic — any config source works
-4. **VersionedMap**: Lock-free reads for diagnostics — high-frequency UI updates without contention
-5. **Lazy start**: Only starts servers when files are accessed — no wasted resources
-
-## TODO
-
-- [ ] `tools/eino/` — eino ADK tool adapter
-- [ ] `util/edit.go` — workspace edit application (requires filesystem write implementation)
-- [ ] Tests for manager and client
-- [ ] CI with `go test ./...`
-- [ ] GitHub Actions workflow
+| Skill | Description |
+|-------|-------------|
+| `web-fetch` | Fetch a URL and read its content |
+| `web-search` | Search the web via DuckDuckGo |
+| `lsp-diagnostics` | Get LSP diagnostics for a file |
+| `lsp-references` | Find all references to a symbol |
+| `wiki` | Look up a topic on Wikipedia |
 
 ## Credits
 
-Extracted from [charmbracelet/crush](https://github.com/charmbracelet/crush) with minimal modifications to decouple from the agent framework. Uses [powernap](https://github.com/charmbracelet/x/tree/main/powernap) for the LSP transport layer.
+LSP integration extracted from [charmbracelet/crush](https://github.com/charmbracelet/crush). Search logic ported from [charmbracelet/crush](https://github.com/charmbracelet/crush/blob/main/internal/agent/tools/search.go). Uses [powernap](https://github.com/charmbracelet/x/tree/main/powernap) for LSP transport.
 
 ## License
 

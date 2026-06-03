@@ -35,6 +35,7 @@ agentutil fetch <url> [--timeout 30s]
 ```
 
 Output:
+
 ```json
 {
   "content": "# Page Title\n\nBody as markdown...",
@@ -51,6 +52,7 @@ agentutil search <query> [--max 10] [-n 10] [--timeout 30s]
 ```
 
 Output:
+
 ```json
 {
   "results": [
@@ -134,18 +136,14 @@ func main() {
 
 Pre-built skills for use with AI coding assistants (Crush, Claude Code, etc.) are in `skills/`:
 
-| Skill | Description |
-|-------|-------------|
-| `web-fetch` | Fetch a URL and read its content |
-| `web-search` | Search the web via DuckDuckGo |
-| `lsp-diagnostics` | Get LSP diagnostics for a file |
-| `lsp-references` | Find all references to a symbol |
-| `wiki` | Look up a topic on Wikipedia |
+| Skill             | Description                      |
+| ----------------- | -------------------------------- |
+| `web-fetch`       | Fetch a URL and read its content |
+| `web-search`      | Search the web via DuckDuckGo    |
+| `lsp-diagnostics` | Get LSP diagnostics for a file   |
+| `lsp-references`  | Find all references to a symbol  |
+| `wiki`            | Look up a topic on Wikipedia     |
 
 ## Credits
 
 LSP integration extracted from [charmbracelet/crush](https://github.com/charmbracelet/crush). Search logic ported from [charmbracelet/crush](https://github.com/charmbracelet/crush/blob/main/internal/agent/tools/search.go). Uses [powernap](https://github.com/charmbracelet/x/tree/main/powernap) for LSP transport.
-
-## License
-
-MIT

@@ -1,5 +1,7 @@
 package lsp
 
+import "maps"
+
 import "sync"
 
 // VersionedMap is a thread-safe map that tracks a version number on every write.
@@ -56,9 +58,7 @@ func (m *VersionedMap[K, V]) Copy() map[K]V {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	result := make(map[K]V, len(m.data))
-	for k, v := range m.data {
-		result[k] = v
-	}
+	maps.Copy(result, m.data)
 	return result
 }
 

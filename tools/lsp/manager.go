@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"maps"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -24,33 +25,33 @@ const unavailableRetryDelay = 30 * time.Second
 // skipAutoStartCommands contains commands that are too generic or ambiguous to
 // auto-start without explicit user configuration.
 var skipAutoStartCommands = map[string]bool{
-	"buck2":    true,
-	"buf":      true,
-	"cue":      true,
-	"dart":     true,
-	"deno":     true,
-	"dotnet":   true,
-	"dprint":   true,
-	"gleam":    true,
-	"java":     true,
-	"julia":    true,
-	"koka":     true,
-	"node":     true,
-	"npx":      true,
-	"perl":     true,
-	"plz":      true,
-	"python":   true,
-	"python3":  true,
-	"R":        true,
-	"racket":   true,
-	"rome":     true,
-	"rubocop":  true,
-	"ruff":     true,
-	"scarb":    true,
-	"solc":     true,
-	"stylua":   true,
-	"swipl":    true,
-	"tflint":   true,
+	"buck2":   true,
+	"buf":     true,
+	"cue":     true,
+	"dart":    true,
+	"deno":    true,
+	"dotnet":  true,
+	"dprint":  true,
+	"gleam":   true,
+	"java":    true,
+	"julia":   true,
+	"koka":    true,
+	"node":    true,
+	"npx":     true,
+	"perl":    true,
+	"plz":     true,
+	"python":  true,
+	"python3": true,
+	"R":       true,
+	"racket":  true,
+	"rome":    true,
+	"rubocop": true,
+	"ruff":    true,
+	"scarb":   true,
+	"solc":    true,
+	"stylua":  true,
+	"swipl":   true,
+	"tflint":  true,
 }
 
 // Manager handles lazy initialization of LSP clients based on file types.
@@ -447,8 +448,6 @@ func (m *Map[K, V]) Seq2() map[K]V {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	result := make(map[K]V, len(m.m))
-	for k, v := range m.m {
-		result[k] = v
-	}
+	maps.Copy(result, m.m)
 	return result
 }

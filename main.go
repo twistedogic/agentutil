@@ -18,6 +18,7 @@ func main() {
 	root.AddCommand(newFetchCmd())
 	root.AddCommand(newWikiCmd())
 	root.AddCommand(newSearchCmd())
+	root.AddCommand(newSkillCmd())
 
 	if err := root.Execute(); err != nil {
 		writeError(err)

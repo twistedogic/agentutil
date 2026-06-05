@@ -19,6 +19,7 @@ func main() {
 	root.AddCommand(newWikiCmd())
 	root.AddCommand(newSearchCmd())
 	root.AddCommand(newSkillCmd())
+	root.AddCommand(newTodoCmd())
 
 	if err := root.Execute(); err != nil {
 		writeError(err)

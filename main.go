@@ -20,6 +20,7 @@ func main() {
 	root.AddCommand(newSearchCmd())
 	root.AddCommand(newSkillCmd())
 	root.AddCommand(newTodoCmd())
+	root.AddCommand(newTravelCmd())
 
 	if err := root.Execute(); err != nil {
 		writeError(err)
